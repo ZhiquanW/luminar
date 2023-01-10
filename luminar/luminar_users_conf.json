@@ -1,0 +1,59 @@
+{
+    "global_config": {
+        "rule_filters": [
+            {
+                "name": "tiny_process",
+                "max_cpu_usage": 0.1,
+                "max_cpu_memory": 512,
+                "max_gpu_usage": 0.1,
+                "max_gpu_memory": 512
+            }
+        ],
+        "common_rules": [
+            {
+                "name": "default_rule",
+                "priority": 0,
+                "max_cpu_core_time": 40,
+                "max_cpu_memory": 8192,
+                "max_gpu_device_time": 40,
+                "max_gpu_memory": 1024
+            },
+            {
+                "name": "all",
+                "priority": -99,
+                "max_cpu_core_time": 40,
+                "max_cpu_memory": 8192,
+                "max_gpu_device_time": 40,
+                "max_gpu_memory": 8192
+            }
+        ]
+    },
+    "user_config": [
+        {
+            "name": "he425",
+            "rules": [
+                {
+                    "name": "high_preformance",
+                    "priority": -1,
+                    "max_cpu_core_time": 40,
+                    "max_cpu_memory": 12288,
+                    "max_gpu_device_time": 40,
+                    "max_gpu_memory": 12288
+                }
+            ]
+        },
+        {
+            "name": "xu314",
+            "rules": [
+                {
+                    "name": "high_preformance",
+                    "priority": 1,
+                    "max_cpu_core_time": 1,
+                    "max_gpu_device_time": 1,
+                    "max_cpu_memory": 8192,
+                    "max_gpu_memory": 2048
+                }
+            ]
+        }
+    ]
+}
