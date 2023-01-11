@@ -1,8 +1,10 @@
 [package]
+authors = ["Zhiquan Wang <wang4490@purdue.edu", "Zixun Yu <yu635@purdue.edu>"]
 edition = "2021"
+license = "GPL"
+license-file = "LICENSE"
 name = "luminar"
 version = "0.1.0"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
