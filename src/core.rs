@@ -1,6 +1,4 @@
-use core::time;
 use serde;
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::thread::sleep;
@@ -199,6 +197,8 @@ impl LuminarSystemReception {
         // sys_reception
         // return l;
     }
+    // Dec,31,2022: win the combat with Zixun Yu about using str and String
+    // choose to use String here
     // TODO: remove borrow in return value, change to u32
     pub fn get_uid_by_uname(&self, uname: &String) -> Option<&u32> {
         self.sys
@@ -206,16 +206,6 @@ impl LuminarSystemReception {
             .iter()
             .find(|u| u.name() == uname.as_str())
             .map(|u| u.id().deref())
-    }
-    // Dec,31,2022: win the combat with Zixun Yu about using str and String
-    // choose to use String here
-    // [suppose this operation should not be called frequently] generate a new hash map when query user name by uid
-    pub fn get_uname_by_uid(&self, uid: &u32) -> Option<String> {
-        self.sys
-            .users()
-            .iter()
-            .find(|u| uid == u.id().deref())
-            .map(|u| u.name().to_string())
     }
 
     // the method get gpu info in a tuple of (gpu_instance_id, smutil, memory) and return a HashMap of pid to this tuple.

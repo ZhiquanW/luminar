@@ -1,11 +1,20 @@
 [package]
 authors = ["Zhiquan Wang <wang4490@purdue.edu", "Zixun Yu <yu635@purdue.edu>"]
+categories = ["command-line-utilities", "gpu"]
+description = "Manage computing resources for multiple users on single machine."
 edition = "2021"
-license = "GPL"
+homepage = "https://github.com/ZhiquanW/luminar/"
+keywords = ["rust", "gpu"]
 license-file = "LICENSE"
 name = "luminar"
+readme = "README.md"
+repository = "https://github.com/ZhiquanW/luminar/"
 version = "0.1.0"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[[bin]]
+name = "luminar"
+path = "src/main.rs"
 
 [dependencies]
 nvml-wrapper = "0.8.0"
