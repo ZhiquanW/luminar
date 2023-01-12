@@ -1,9 +1,13 @@
+use crate::cfg::{LuminarRule, LuminarRuleFilter, LuminarUserInfo};
+use crate::core::LuminarManager;
 use serde_json::{self, Value};
 use std::collections::HashMap;
 use std::fs;
-
-use crate::core::{LuminarManager, LuminarRule, LuminarRuleFilter, LuminarUserInfo};
+use structopt::StructOpt;
+mod argparse;
+mod cfg;
 mod core;
+use std::env;
 
 fn load_luminar_configuration(
     cfg_path: &str,
@@ -51,14 +55,16 @@ fn load_luminar_configuration(
 }
 
 fn main() {
-    let (luminar_users_info, luminar_rule_filters, luminar_common_rules) =
-        load_luminar_configuration("luminar_users_conf.json");
-    let mut luminar_manager = LuminarManager::new(
-        luminar_users_info,
-        luminar_rule_filters,
-        luminar_common_rules,
-        0.5,
-    );
-    println!("{:#?}", luminar_manager.user_dict);
-    luminar_manager.launch();
+    let opt = argparse::LuminarArgs::from_args();
+    println!("{:?}", opt.cmd);
+    // let (luminar_users_info, luminar_rule_filters, luminar_common_rules) =
+    //     load_luminar_configuration("luminar_users_conf.json");
+    // let mut luminar_manager = LuminarManager::new(
+    //     luminar_users_info,
+    //     luminar_rule_filters,
+    //     luminar_common_rules,
+    //     0.5,
+    // );
+    // println!("{:#?}", luminar_manager.user_dict);
+    // luminar_manager.launch();
 }

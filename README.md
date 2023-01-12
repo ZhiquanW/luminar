@@ -1,12 +1,18 @@
 # laminar
 
-# Notes
-1. brief design
-   1. method calls at inital 
-      1. read configuration files
-      2. create user information structure based on configuration
-   2. method calls at each time step
-      1. update system resource information: total cpu usage, total(free) memory usage ...
-      2. update users resources allocation
-         1. each user: cpu/gpu usage, cpu/gpu memory usage
-      3. perform mamagement actions based on the user configuration: kill process ...
+```Manage computing resources for multiple users on single machine.```
+
+NOTE: We only support NVIDIA GPU currently, AMD GPU is not yet supported.
+
+# Usage
+```
+$ luminar
+```
+
+# Installation
+This utility is available via [crate.io](https://crates.io/crates/luminar)
+```
+$ cargo install luminar
+```
+
+# Quick Start

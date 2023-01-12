@@ -1,10 +1,10 @@
 [package]
 authors = ["Zhiquan Wang <wang4490@purdue.edu", "Zixun Yu <yu635@purdue.edu>"]
-categories = ["command-line-utilities", "gpu"]
+categories = ["command-line-utilities"]
 description = "Manage computing resources for multiple users on single machine."
 edition = "2021"
 homepage = "https://github.com/ZhiquanW/luminar/"
-keywords = ["rust", "gpu"]
+keywords = ["rust", "gpu", "computing resource management"]
 license-file = "LICENSE"
 name = "luminar"
 readme = "README.md"
@@ -21,4 +21,5 @@ nvml-wrapper = "0.8.0"
 pretty-bytes = "0.2.2"
 serde = {version = "1.0", features = ["derive"]}
 serde_json = "1.0"
+structopt = "0.3.26"
 sysinfo = "0.27.1"
