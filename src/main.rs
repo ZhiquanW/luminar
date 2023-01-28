@@ -1,62 +1,113 @@
+use crate::backend::LuminarResManager;
 use crate::cfg::{LuminarRule, LuminarRuleFilter, LuminarUserInfo};
-use crate::core::LuminarManager;
+use dist_cmd::distribute_commonds;
 use serde_json::{self, Value};
 use std::collections::HashMap;
 use std::fs;
+use std::net::TcpStream;
+use std::ops::{Deref, DerefMut};
 use structopt::StructOpt;
 mod argparse;
+mod backend;
 mod cfg;
 mod core;
+mod dist_cmd;
+mod network;
+use rand::Rng;
 use std::env;
-
-fn load_luminar_configuration(
-    cfg_path: &str,
-) -> (
-    Vec<LuminarUserInfo>,
-    Vec<LuminarRuleFilter>,
-    Vec<LuminarRule>,
-) {
-    let config_string = fs::read_to_string(cfg_path).expect("failed to read configuration file");
-    let mut luminar_config: HashMap<String, serde_json::Value> =
-        serde_json::from_str(&config_string).expect("failed to parse configuration file");
-    let luminar_user_info: Vec<LuminarUserInfo> = serde_json::from_value(
-        luminar_config
-            .remove("user_config")
-            .expect("no user_config in luminar_config"),
-    )
-    .expect("failed to convert Value to LuminarUserInfo");
-    let luminar_global_config: Value = serde_json::from_value(
-        luminar_config
-            .remove("global_config")
-            .expect("failed to read global_config from json file"),
-    )
-    .expect("failed to extract global config");
-    let luminar_rule_filters: Vec<LuminarRuleFilter> = serde_json::from_value(
-        luminar_global_config
-            .as_object()
-            .expect("failed to convert value to object")
-            .to_owned()
-            .remove("rule_filters")
-            .expect("failed to get rule_filters from Value"),
-    )
-    .expect("failed to load rule filters");
-    let luminar_common_rule: Vec<LuminarRule> = serde_json::from_value(
-        luminar_global_config
-            .as_object()
-            .expect("failed to convert to object")
-            .to_owned()
-            .remove("common_rules")
-            .expect("failed to get common_rules from luminar_global_config"),
-    )
-    .expect("faield to read luminar rules from json");
-    // .expect("failed to translate json rule_filters to Vec<RuleFilter>");
-    println!("{luminar_common_rule:#?}");
-    return (luminar_user_info, luminar_rule_filters, luminar_common_rule);
+use std::sync::mpsc::channel;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::{self, Duration};
+use threadpool::ThreadPool;
+fn handle_request(mut stream: TcpStream) {
+    use std::io::{BufRead, Read};
+    let buf_reader = std::io::BufReader::new(&mut stream);
+    let http_request: Vec<_> = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+    std::thread::sleep(Duration::from_secs(2));
+}
+fn run() {
+    use ::std::net::TcpListener;
+    let listener = TcpListener::bind("127.0.0.1:3114").expect("failed to bind listener");
+    println!("[luminar service] start listen requests");
+    let pool = ThreadPool::new(4);
+    for stream in listener.incoming() {
+        let stream = stream.expect("failed to establish connectionfrom incoming tcp stream");
+        pool.execute(|| handle_request(stream));
+    }
+}
+fn status() {
+    use std::io::Write;
+    use std::net::TcpStream;
+    println!("status");
+    let mut stream = TcpStream::connect("127.0.0.1:3114").unwrap();
+    stream.write_all("status".as_bytes()).unwrap();
 }
 
+fn add(data: Arc<Mutex<LuminarResManager>>) {
+    println!("Add in");
+    for _ in 0..16 {
+        {
+            let mut data = data.lock().expect("failed to lock data in add.");
+            data.refresh_interval += 1.0;
+            println!("add: {:?}", data.refresh_interval);
+        }
+        let mut rng = rand::thread_rng();
+        let n1: f32 = rng.gen();
+        std::thread::sleep(Duration::from_secs_f32(n1));
+    }
+}
+
+fn double_minus(data: Arc<Mutex<LuminarResManager>>) {
+    println!("Minus in");
+    for _ in 0..16 {
+        {
+            let mut data = data.lock().expect("failed to lock data in double_minus.");
+            data.refresh_interval -= 1.0;
+            println!("double_minus: {:?}", data.refresh_interval);
+        }
+        let mut rng = rand::thread_rng();
+        let n1: f32 = rng.gen();
+        std::thread::sleep(Duration::from_secs_f32(n1));
+    }
+}
+// fn mutex() {
+//     let (luminar_users_info, luminar_rule_filters, luminar_common_rules) =
+//         load_luminar_configuration("luminar_users_conf.json");
+//     let mut luminar_manager = LuminarResManager::new(
+//         luminar_users_info,
+//         luminar_rule_filters,
+//         luminar_common_rules,
+//         0.5,
+//     );
+
+//     let data = Arc::new(Mutex::new(luminar_manager));
+//     let thread_data = Arc::clone(&data);
+//     let add_thread = thread::spawn(move || add(thread_data));
+//     let thread_data = Arc::clone(&data);
+//     let minus_thread = thread::spawn(move || double_minus(thread_data));
+//     std::thread::sleep(Duration::from_secs(2));
+//     println!("AA");
+//     add_thread.join();
+//     println!("add_thread stoped");
+//     minus_thread.join();
+//     println!("miuns thread stopped");
+// }
 fn main() {
-    let opt = argparse::LuminarArgs::from_args();
-    println!("{:?}", opt.cmd);
+    let args = argparse::LuminarArgs::from_args();
+    distribute_commonds(args.cmd);
+    // println!("{:?}", args.cmd);
+    // match args.cmd {
+    //     argparse::Command::Run { cfg_path } => {
+    //         run();
+    //     }
+    //     argparse::Command::Status => status(),
+    //     argparse::Command::Mutex => mutex(),
+    // }
     // let (luminar_users_info, luminar_rule_filters, luminar_common_rules) =
     //     load_luminar_configuration("luminar_users_conf.json");
     // let mut luminar_manager = LuminarManager::new(

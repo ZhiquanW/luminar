@@ -1,5 +1,7 @@
 {
     "global_config": {
+        "port": 3114,
+        "refresh_interval": 0.5,
         "rule_filters": [
             {
                 "name": "tiny_process",

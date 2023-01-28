@@ -3,7 +3,9 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 pub enum Command {
-    run { cfg_path: Option<String> },
+    Run { cfg_path: Option<String> },
+    Status,
+    Mutex,
 }
 #[derive(Debug, StructOpt)]
 #[structopt(

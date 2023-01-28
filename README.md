@@ -16,3 +16,7 @@ $ cargo install luminar
 ```
 
 # Quick Start
+
+# Development Road
+## Jan 27 2023: 22:51
+- [ ] monitor resource usage of all users
