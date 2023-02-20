@@ -24,6 +24,7 @@ impl LuminarServer {
             let mut res_manager_guard = shared_res_manager.lock().expect("msaaag");
             let refresh_interval = res_manager_guard.refresh_interval;
             res_manager_guard.monitor_update();
+            res_manager_guard.display_update();
             res_manager_guard.log_update();
             drop(res_manager_guard);
             sleep(std::time::Duration::from_secs_f32(refresh_interval));

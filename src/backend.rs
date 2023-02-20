@@ -303,6 +303,33 @@ impl LuminarResManager {
     pub fn log_update(&mut self) {
         self.logging_system.log();
     }
+    pub fn display_update(&self) {
+        // history usage print
+
+        use prettytable::Table;
+        let mut usage_table = Table::new();
+        usage_table.add_row(row![
+            "User Name",
+            "CPU (core * minutes)",
+            "Memory(MB * minutes)",
+            "GPU (device * minutes)",
+            "GPU Memory (MB * minutes)"
+        ]);
+        for (_uid, backup) in self.logging_system.user_tracker_backups.iter() {
+            usage_table.add_row(row![
+                backup.name,
+                format!("{:.3}", backup.cpu_core_time / 60.0).as_str(),
+                format!("{:.3}", backup.cpu_memory_time / 60).as_str(),
+                format!("{:.3}", backup.gpu_device_time / 60.0).as_str(),
+                format!("{:.3}", backup.gpu_memory_time / 60).as_str()
+            ]);
+        }
+        // Print the table to stdout
+        usage_table.printstd();
+        print!("\x1B[2J\x1B[1;1H");
+
+        // backup usage print
+    }
     // pub fn update(&mut self) {
     //     let uid_process_info_map = self.sys_reception.get_uid_process_info_map();
     //     let uid_process_info_map = self.global_filter_rules(uid_process_info_map);

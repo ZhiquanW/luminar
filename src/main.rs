@@ -1,7 +1,8 @@
 use dist_cmd::distribute_commonds;
 use structopt::StructOpt;
 mod argparse;
-
+#[macro_use]
+extern crate prettytable;
 mod backend;
 mod cfg;
 mod core;
