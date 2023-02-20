@@ -1,9 +1,8 @@
-use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 pub enum Command {
-    Run { cfg_path: Option<String> },
+    Server { cfg_path: Option<String> },
     Status,
     Mutex,
 }

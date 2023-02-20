@@ -5,7 +5,7 @@
         "rule_filters": [
             {
                 "name": "tiny_process",
-                "max_cpu_usage": 0.1,
+                "max_cpu_usage": 0.2,
                 "max_cpu_memory": 512,
                 "max_gpu_usage": 0.1,
                 "max_gpu_memory": 512
@@ -30,7 +30,7 @@
             }
         ]
     },
-    "user_config": [
+    "user_infos": [
         {
             "name": "he425",
             "rules": [

@@ -1,13 +1,11 @@
-use std::io::BufReader;
-use std::net::{TcpListener, TcpStream};
+use std::net::TcpListener;
 use threadpool::ThreadPool;
 
-use crate::add;
+#[derive(Debug)]
 pub struct LuminarNetServer {
     pub listerner: TcpListener,
     pub pool: ThreadPool,
 }
-
 impl LuminarNetServer {
     pub fn new(addr: &str, num_worker: usize) -> LuminarNetServer {
         return LuminarNetServer {
