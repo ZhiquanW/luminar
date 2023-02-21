@@ -39,19 +39,19 @@ the luminar service consists of two modules:
 2. communication service: luminar service run as a local server, all the commands should be sent from client as a network request.
 the communication service listens to the request from the client once the luminar service is running
 */
-fn server(app_data_path: Option<String>) {
-    let binding = match &app_data_path {
+fn server(working_dir: Option<String>) {
+    let binding = match &working_dir {
         None => "/etc/luminar",
         Some(s) => s.as_str(),
     };
-    let app_data_path = Path::new(&binding);
-    if !app_data_path.exists() {
+    let working_dir = Path::new(&binding);
+    if !working_dir.exists() {
         // Recursively create a directory and all of its parent components if they are missing.
-        std::fs::create_dir_all(app_data_path)
-            .expect(format!("failed to create folder: {:?}", app_data_path).as_str());
+        std::fs::create_dir_all(working_dir)
+            .expect(format!("failed to create folder: {:?}", working_dir).as_str());
     }
     // create default configuration file if no configuration file exist
-    let luminar_cfg_path = app_data_path.join("luminarc.json");
+    let luminar_cfg_path = working_dir.join("luminarc.json");
     if !luminar_cfg_path.exists() {
         ini_luminar_cfg_file(&luminar_cfg_path).expect("failed to init lumianr config file");
     }
@@ -60,7 +60,13 @@ fn server(app_data_path: Option<String>) {
         load_luminar_configuration(&luminar_cfg_path);
     let ip_addr = format!("127.0.0.1:{}", port);
     let service = LuminarServer::new(
-        LuminarResManager::new(users_info, rule_filters, common_rules, refresh_interval),
+        LuminarResManager::new(
+            working_dir,
+            users_info,
+            rule_filters,
+            common_rules,
+            refresh_interval,
+        ),
         LuminarNetServer::new(&ip_addr, 4),
     );
     service.launch();

@@ -1,11 +1,11 @@
 use chrono;
 use chrono::Timelike;
 use serde;
-use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 use std::ops::Deref;
 use std::path::PathBuf;
+use std::{collections::HashMap, path::Path};
 use sysinfo::{PidExt, ProcessExt, SystemExt, UserExt};
 
 use crate::cfg::{LuminarRule, LuminarRuleFilter, LuminarUserInfo};
@@ -53,6 +53,7 @@ pub struct LuminarRuleTracker {
 ///
 #[derive(Debug)]
 pub struct LuminarLoggingSystem {
+    log_dir: PathBuf,
     pub next_log_time: chrono::DateTime<chrono::Local>,
     pub user_tracker_backups: HashMap<u32, LuminarUserTrackerBackup>,
 }
@@ -62,15 +63,15 @@ impl LuminarLoggingSystem {
     }
     fn log(&mut self) {
         if self.should_log() {
-            let log_path = PathBuf::from("/etc/luminar/logs/");
-            if !log_path.exists() {
+            if !self.log_dir.exists() {
                 // Recursively create a directory and all of its parent components if they are missing.
-                std::fs::create_dir_all(log_path.as_path())
-                    .expect(format!("failed to create folder: {:?}", log_path).as_str());
+                std::fs::create_dir_all(self.log_dir.as_path())
+                    .expect(format!("failed to create folder: {:?}", self.log_dir).as_str());
             }
 
-            let file_path =
-                log_path.join(format!("{}", chrono::Local::now().format("%Y-%m-%d_%H:%M")));
+            let file_path = self
+                .log_dir
+                .join(format!("{}", chrono::Local::now().format("%Y-%m-%d_%H:%M")));
 
             // create file if not exist
             let mut file = fs::OpenOptions::new()
@@ -92,17 +93,8 @@ impl LuminarLoggingSystem {
                 tracker_backup.reset();
             }
             self.next_log_time += chrono::Duration::days(1);
-            println!("luminar log to: {:?}", file_path);
         }
     }
-}
-#[test]
-fn foo() {
-    let log_path = format!(
-        "/etc/luminar/logs/{}.log",
-        chrono::Local::now().format("%Y-%m-%d_%H:%M")
-    );
-    println!("{}", log_path);
 }
 /// # record the computing resource of a user during a specific duraion
 #[derive(Debug, Default, serde::Deserialize, serde::Serialize)]
@@ -165,7 +157,8 @@ pub struct LuminarResManager {
 }
 
 impl LuminarResManager {
-    pub fn new(
+    pub fn new<P: AsRef<Path>>(
+        working_dir: P,
         mut users_info: Vec<LuminarUserInfo>,
         rule_filters: Vec<LuminarRuleFilter>,
         common_rules: Vec<LuminarRule>,
@@ -216,13 +209,14 @@ impl LuminarResManager {
                 .collect();
         }
         let log_time = chrono::Local::now()
-            .with_hour(18)
+            .with_hour(23)
             .unwrap()
-            .with_minute(44)
+            .with_minute(59)
             .unwrap()
             .with_second(59)
             .unwrap();
         let logging_system = LuminarLoggingSystem {
+            log_dir: working_dir.as_ref().to_owned(),
             next_log_time: log_time,
             user_tracker_backups: sys_reception
                 .get_uid_uname_map()
@@ -310,10 +304,10 @@ impl LuminarResManager {
         let mut usage_table = Table::new();
         usage_table.add_row(row![
             "User Name",
-            "CPU (core * minutes)",
-            "Memory(MB * minutes)",
-            "GPU (device * minutes)",
-            "GPU Memory (MB * minutes)"
+            "CPU Usage\n(core * minutes)",
+            "Memory \n(MB * minutes)",
+            "GPU Usage\n(device * minutes)",
+            "GPU Memory \n(MB * minutes)"
         ]);
         for (_uid, backup) in self.logging_system.user_tracker_backups.iter() {
             usage_table.add_row(row![
@@ -325,8 +319,15 @@ impl LuminarResManager {
             ]);
         }
         // Print the table to stdout
-        usage_table.printstd();
         print!("\x1B[2J\x1B[1;1H");
+
+        println!(
+            "next log time: {}",
+            self.logging_system
+                .next_log_time
+                .format("%Y-%m-%d %H:%M:%S")
+        );
+        usage_table.printstd();
 
         // backup usage print
     }

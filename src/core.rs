@@ -21,7 +21,9 @@ impl LuminarServer {
         println!("lumianr starts running ...");
         let shared_res_manager = Arc::clone(&self.res_manager);
         let monitor_thread = thread::spawn(move || loop {
-            let mut res_manager_guard = shared_res_manager.lock().expect("msaaag");
+            let mut res_manager_guard = shared_res_manager
+                .lock()
+                .expect("resource manager failed to lock");
             let refresh_interval = res_manager_guard.refresh_interval;
             res_manager_guard.monitor_update();
             res_manager_guard.display_update();
