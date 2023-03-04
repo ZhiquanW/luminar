@@ -16,7 +16,6 @@ impl LuminarServer {
         }
     }
     // main method
-
     pub fn launch(self) {
         println!("lumianr starts running ...");
         let shared_res_manager = Arc::clone(&self.res_manager);

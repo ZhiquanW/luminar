@@ -321,6 +321,7 @@ impl LuminarResManager {
         // Print the table to stdout
         print!("\x1B[2J\x1B[1;1H");
 
+        println!("version {}", env!("CARGO_PKG_VERSION"));
         println!(
             "next log time: {}",
             self.logging_system
@@ -453,6 +454,8 @@ impl LuminarResManager {
     }
 }
 
+/// a wrapper class for sysinfo and nvml_wrapper to get cpu and gpu usage information easily
+///
 #[derive(Debug)]
 pub struct LuminarSystemReception {
     // assistant variable for fetching process info
@@ -463,17 +466,13 @@ impl LuminarSystemReception {
     pub fn new() -> LuminarSystemReception {
         let sys = sysinfo::System::new_all();
         let nvml = nvml_wrapper::Nvml::init().expect("failed to init nvml");
-        let mut sys_reception = LuminarSystemReception {
+        let sys_reception = LuminarSystemReception {
             sys: sys,
             nvml: nvml,
         };
-        sys_reception.get_pid_uid_map();
+        // sys_reception.get_pid_uid_map();
         sys_reception
-        // sys_reception
-        // return l;
     }
-    // Dec,31,2022: win the combat with Zixun Yu about using str and String
-    // choose to use String here
     // TODO: remove borrow in return value, change to u32
     pub fn get_uid_by_uname(&self, uname: &String) -> Option<&u32> {
         self.sys
@@ -511,12 +510,7 @@ impl LuminarSystemReception {
                 Ok(ps) => ps,
                 Err(_) => continue,
             };
-            // let Ok(device_idx) = device.index() else{
-            //     continue;
-            // };
-            // let Ok(compute_processes) = device.running_compute_processes() else{
-            //     continue;
-            // };
+
             for compute_process in compute_processes.iter() {
                 use nvml_wrapper::enums::device::UsedGpuMemory::Used;
                 let Used(gpu_memory) = compute_process.used_gpu_memory else{
@@ -524,9 +518,7 @@ impl LuminarSystemReception {
                 };
                 gpu_info_map.insert(compute_process.pid, (device_idx, 0, gpu_memory));
             }
-            // let Ok(processes_sample) = device.process_utilization_stats(None) else{
-            //     continue;
-            // };
+
             let processes_sample = match device.process_utilization_stats(None) {
                 Ok(ps_sample) => ps_sample,
                 Err(_) => continue,
@@ -538,19 +530,6 @@ impl LuminarSystemReception {
             }
         }
         gpu_info_map
-    }
-    // pub fn get_process_usage_by_pid(&self, pid: &u32) -> Option<LuminarProcessUtil> {}
-    pub fn get_pid_uid_map(&mut self) -> HashMap<u32, u32> {
-        self.sys.refresh_all();
-        // processes can vanish, appear or maintain in the system. To make the logic clear, init all related values when refresh to update
-        // clear pid_uid_map to init all values from strach when refresh
-        self
-            .sys
-            .processes()
-            .iter()
-            .filter(|pair| Some(pair.1).is_some())
-            .map(|(pid, process)| (pid.as_u32(), process.user_id().expect("[alert: this error should not occur] failed to get user id from process").deref().clone()))
-            .collect::<HashMap<_, _>>()
     }
 
     pub fn get_uid_process_info_map(&mut self) -> HashMap<u32, Vec<LuminarProcessUtil>> {
